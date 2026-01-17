@@ -7,7 +7,6 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server);
-mongodb+srv://Whatsapp:<Nishant3030>@whatsaap.3ognk3v.mongodb.net/?appName=Whatsaap
 
 app.use(express.static(path.join(__dirname, "public")));
 
