@@ -30,6 +30,32 @@ joinBtn.onclick = () => {
   chatContainer.classList.remove("hidden");
 };
 
+
+
+
+
+function joinChat() {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const errorDiv = document.getElementById("error");
+
+  // Set your chat password here
+  const CHAT_PASSWORD = "12345";
+
+  if (username === "" || password === "") {
+    errorDiv.textContent = "All fields are required!";
+    return;
+  }
+
+  if (password !== CHAT_PASSWORD) {
+    errorDiv.textContent = "Wrong password!";
+    return;
+  }
+
+
+
+  
+
 // Send message
 sendBtn.onclick = sendMessage;
 messageInput.addEventListener("keypress", e => {
