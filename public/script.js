@@ -19,21 +19,6 @@ socket.on("message_history", messages => {
   });
 });
 
-
-// Join chat
-joinBtn.onclick = () => {
-  const username = usernameInput.value.trim();
-  if (!username) return;
-
-  socket.emit("join", username);
-  joinContainer.classList.add("hidden");
-  chatContainer.classList.remove("hidden");
-};
-
-
-
-
-
 function joinChat() {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
@@ -54,7 +39,17 @@ function joinChat() {
 
 
 
-  
+
+// Join chat
+joinBtn.onclick = () => {
+  const username = usernameInput.value.trim();
+  if (!username) return;
+
+  socket.emit("join", username);
+  joinContainer.classList.add("hidden");
+  chatContainer.classList.remove("hidden");
+};
+
 
 // Send message
 sendBtn.onclick = sendMessage;
