@@ -31,7 +31,7 @@ joinBtn.onclick = () => {
 
   if (password !== CHAT_PASSWORD) {
     joinError.textContent = "Wrong password!";
-    alert("Wrong password!");
+    alert("BHAI JI YE TOH GALT HAI KRIYPYA KRKE DUBARA TRY KRE!");
     return;
   }
 
