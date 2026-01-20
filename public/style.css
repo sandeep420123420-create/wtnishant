@@ -5,6 +5,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  background-color: pink;
 }
 
 .hidden {
@@ -12,17 +13,19 @@ body {
 }
 
 #join-container, #chat-container {
-  background: white;
+  background: rgb(109, 205, 61);
   padding: 20px;
   width: 350px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 10px 5px 0px rgba(21, 21, 21, 0.1);
+  text-align: center;
+  background-color: aqua;
 }
 
 #messages {
   height: 250px;
   overflow-y: auto;
-  border: 1px solid #ddd;
+  border: 1px solid #282727;
   margin: 10px 0;
   padding: 5px;
 }
@@ -51,5 +54,5 @@ body {
 }
 
 #input-area button {
-  padding: 5px 10px;
+  padding: 10px 20px;
 }
