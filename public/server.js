@@ -5,74 +5,64 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-
 const io = new Server(server);
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
+// DEMO USERS (each user has DIFFERENT password)
+const registeredUsers = {
+  nishant: "123",
+  aman: "456",
+  rahul: "789"
+};
 
-// Store connected users
 const users = new Map();
 const MAX_USERS = 6;
 
-// Basic route (optional)
-app.get("/", (req, res) => {
-  res.send("Chat server is running");
-});
+io.on("connection", socket => {
+  console.log("Connected:", socket.id);
 
-// Socket.IO connection
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  socket.on("join", ({ username, password }) => {
 
-  // Reject if room is full
-  if (users.size >= MAX_USERS) {
-    socket.emit("room_full", "Chat room is full (max 6 users)");
-    socket.disconnect();
-    return;
-  }
+    if (!registeredUsers[username]) {
+      socket.emit("join_error", "User not found");
+      return;
+    }
 
-  // When user joins with a name
-  socket.on("join", (username) => {
+    if (registeredUsers[username] !== password) {
+      socket.emit("join_error", "Wrong password");
+      return;
+    }
+
+    if (users.size >= MAX_USERS) {
+      socket.emit("join_error", "Room is full");
+      return;
+    }
+
     users.set(socket.id, username);
+    socket.emit("join_success");
 
-    // Notify others
     socket.broadcast.emit("user_joined", username);
-
-    // Send current users list
     io.emit("users_list", Array.from(users.values()));
   });
 
-  // Handle incoming messages
-  socket.on("message", (msg) => {
-    const username = users.get(socket.id);
-    if (!username) return;
+  socket.on("message", msg => {
+    const user = users.get(socket.id);
+    if (!user) return;
 
-    io.emit("message", {
-      user: username,
-      text: msg,
-      time: new Date().toISOString()
-    });
+    io.emit("message", { user, text: msg });
   });
 
-  // Handle disconnect
   socket.on("disconnect", () => {
-    const username = users.get(socket.id);
-    if (!username) return;
+    const user = users.get(socket.id);
+    if (!user) return;
 
     users.delete(socket.id);
-    socket.broadcast.emit("user_left", username);
+    socket.broadcast.emit("user_left", user);
     io.emit("users_list", Array.from(users.values()));
-
-    console.log("User disconnected:", socket.id);
   });
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+server.listen(3000, () => {
+  console.log("Server running on port 3000");
 });
