@@ -1,68 +1,146 @@
-const express = require("pg");
+// =====================
+// Database initialization (PostgreSQL)
+// =====================
+const { Pool } = require("pg");
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production"
+    ? { rejectUnauthorized: false }
+    : false
+});
+
+async function initDB() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      username TEXT NOT NULL,
+      text TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  console.log("PostgreSQL ready");
+}
+
+// =====================
+// Server initialization
+// =====================
+const express = require("express");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+const io = new Server(server, {
+  transports: ["websocket", "polling"],
+  cors: { origin: "*" }
+});
 
 app.use(express.static(path.join(__dirname, "public")));
 
-// DEMO USERS (each user has DIFFERENT password)
-const registeredUsers = {
-  nishant: "123",
-  aman: "456",
-  rahul: "789"
-};
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
+// =====================
+// Chat state
+// =====================
 const users = new Map();
 const MAX_USERS = 6;
 
-io.on("connection", socket => {
-  console.log("Connected:", socket.id);
+const allowedUsers = {
+  anshika: "1111",
+  nishant: "2222",
+  vipul: "3333",
+  rohit: "4444",
+  neha: "5555",
+  aman: "6666"
+};
 
-  socket.on("join", ({ username, password }) => {
+// =====================
+// Socket.IO logic
+// =====================
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-    if (!registeredUsers[username]) {
-      socket.emit("join_error", "User not found");
+  if (users.size >= MAX_USERS) {
+    socket.emit("room_full", "Chat room is full (max 6 users)");
+    socket.disconnect();
+    return;
+  }
+
+  socket.on("join", async ({ username, password }) => {
+
+    if (!allowedUsers[username]) {
+      socket.emit("join_error", "❌ Invalid username");
       return;
     }
 
-    if (registeredUsers[username] !== password) {
-      socket.emit("join_error", "Wrong password");
-      return;
-    }
-
-    if (users.size >= MAX_USERS) {
-      socket.emit("join_error", "Room is full");
+    if (allowedUsers[username] !== password) {
+      socket.emit("join_error", "❌ Wrong password");
       return;
     }
 
     users.set(socket.id, username);
-    socket.emit("join_success");
 
     socket.broadcast.emit("user_joined", username);
     io.emit("users_list", Array.from(users.values()));
+
+    const { rows } = await pool.query(
+      `SELECT username, text, created_at
+       FROM messages
+       ORDER BY created_at ASC
+       LIMIT 50`
+    );
+
+    socket.emit("message_history", rows);
   });
 
-  socket.on("message", msg => {
-    const user = users.get(socket.id);
-    if (!user) return;
+  socket.on("message", async (msg) => {
+    const username = users.get(socket.id);
+    if (!username) return;
 
-    io.emit("message", { user, text: msg });
+    const result = await pool.query(
+      `INSERT INTO messages (username, text)
+       VALUES ($1, $2)
+       RETURNING created_at`,
+      [username, msg]
+    );
+
+    io.emit("message", {
+      user: username,
+      text: msg,
+      time: result.rows[0].created_at
+    });
   });
 
   socket.on("disconnect", () => {
-    const user = users.get(socket.id);
-    if (!user) return;
+    const username = users.get(socket.id);
+    if (!username) return;
 
     users.delete(socket.id);
-    socket.broadcast.emit("user_left", user);
+    socket.broadcast.emit("user_left", username);
     io.emit("users_list", Array.from(users.values()));
+
+    console.log("User disconnected:", socket.id);
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+// =====================
+// Start server
+// =====================
+const PORT = process.env.PORT || 3000;
+
+(async () => {
+  try {
+    await initDB();
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+})();
