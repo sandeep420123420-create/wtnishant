@@ -2,32 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Chat App</title>
+  <title>Chat</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- JOIN -->
+  <!-- Join screen -->
   <div id="join-container">
     <h2>Join Chat</h2>
-    <input id="username" placeholder="Username" />
-    <input id="password" type="password" placeholder="Password" />
+
+    <input id="username" placeholder="Enter your name" />
+    <input type="password" id="password" placeholder="Enter password" />
+
     <button id="join-btn">Join</button>
     <p id="join-error"></p>
   </div>
 
-  <!-- CHAT -->
+  <!-- Chat screen -->
   <div id="chat-container" class="hidden">
     <div id="users"></div>
 
     <div id="messages"></div>
 
     <div id="input-area">
-      <input id="message-input" placeholder="Type message..." />
+      <input id="message-input" placeholder="Type a message..." />
       <button id="send-btn">Send</button>
     </div>
   </div>
 
+  <!-- Socket.IO -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script src="script.js"></script>
 </body>
