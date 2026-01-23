@@ -70,7 +70,7 @@ socket.on("message_history", messages => {
   messagesDiv.innerHTML = "";
 
   messages.forEach(msg => {
-    addMessage(`${msg.username}: ${msg.text}`, msg.created_at);
+    addMessage(`${msg.username}: ${msg.text}`, msg.createdAT);
   });
 
   joinContainer.classList.add("hidden");
