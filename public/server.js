@@ -25,7 +25,7 @@ async function initDB() {
 // =====================
 // Server initialization
 // =====================
-const { pool } = require("pg");
+const express= require("express");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
