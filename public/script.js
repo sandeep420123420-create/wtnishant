@@ -13,8 +13,11 @@ const messagesDiv = document.getElementById("messages");
 const usersDiv = document.getElementById("users");
 const joinError = document.getElementById("join-error");
 
-// 🔐 Chat password
-const CHAT_PASSWORD = "12345";
+const users {
+  anshika: ("1111"),
+nishant:("2222"),
+vipul:("3333"),
+}
 
 // =======================
 // JOIN CHAT WITH PASSWORD
