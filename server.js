@@ -88,22 +88,14 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("user_joined", username);
     io.emit("users_list", Array.from(users.values()));
 
-    // =====================
-    // Send message history
-    // =====================
-    try {
-      const { rows } = await pool.query(
-        `SELECT username, text, created_at
-         FROM messages
-         ORDER BY created_at ASC
-         LIMIT 50`
-      );
-      console.log("Loaded message history:", rows); // ✅ Debug
-      socket.emit("message_history", rows);
-    } catch (err) {
-      console.error("Error fetching message history:", err);
-      socket.emit("message_history", []); // Send empty array if DB fails
-    }
+    const { rows } = await pool.query(
+      `SELECT username, text, created_at
+       FROM messages
+       ORDER BY created_at ASC
+       LIMIT 50`
+    );
+
+    socket.emit("message_history", rows);
   });
 
   socket.on("message", async (msg) => {
