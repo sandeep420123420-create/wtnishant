@@ -48,9 +48,9 @@ app.get("/", (req, res) => {
 // Chat state
 // =====================
 const users = new Map();
-const MAX_USERS = 6;
+const MAX_USERS = 20;
 
-const allowedUsers = {
+ allowedUsers = {
   anshika: "1111",
   nishant: "2222",
   vipul: "3333",
