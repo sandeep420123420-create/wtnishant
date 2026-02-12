@@ -3,7 +3,7 @@ const socket = io({
 });
 
 // Client-side helper (UI only)
-const USERS = {
+USERS = {
   anshika: "1111",
   nishant: "2222",
   vipul: "3333",
